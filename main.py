@@ -1,4 +1,5 @@
-import os, asyncio, io
+import os, asyncio
+from io import BytesIO
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart
@@ -33,7 +34,7 @@ async def message_with_photo(message: types.Message, album: list = None):
         for photo in album:
             photo_id = photo.photo[-1].file_id
             file = await bot.get_file(photo_id)
-            buffer = io.BytesIO()
+            buffer = BytesIO()
 
             await bot.download_file(file.file_path, buffer)
             
@@ -42,7 +43,7 @@ async def message_with_photo(message: types.Message, album: list = None):
     else:
         photo_id = message.photo[-1].file_id
         file = await bot.get_file(photo_id)
-        buffer = io.BytesIO()
+        buffer = BytesIO()
 
         await bot.download_file(file.file_path, buffer)
         
@@ -51,9 +52,10 @@ async def message_with_photo(message: types.Message, album: list = None):
 
     file_path = join_pdf(buffer_list, message.from_user.id)
     
-    await message.answer_document(types.FSInputFile(path=file_path, filename="output.pdf"), caption="Your pdf file")
+    if file_path is not None:
+        await message.answer_document(types.FSInputFile(path=file_path, filename="output.pdf"), caption="Your pdf file")
 
-    delete_pdf(file_path)
+        delete_pdf(file_path)
 
 
 async def main():
